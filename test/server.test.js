@@ -1,106 +1,124 @@
-const tap = require("tap");
+const t = require("tap");
 const supertest = require("supertest");
 const app = require("../app");
+
 const server = supertest(app);
 
-tap.test("POST /tasks", async (t) => {
+t.test("POST /tasks", async (t) => {
   const newTask = {
-    title: "New Task",
-    description: "New Task Description",
-    completed: false,
+    id: 1,
+    title: "Set up environment",
+    description: "Install Node.js, npm, and git",
+    completed: true,
+    priority: "low",
   };
-  const response = await server.post("/tasks").send(newTask);
+
+  const response = await server.post("/airtribe/v1/tasks").send(newTask);
+
   t.equal(response.status, 201);
-  t.end();
 });
 
-tap.test("POST /tasks with invalid data", async (t) => {
+t.test("POST /tasks with invalid data", async (t) => {
   const newTask = {
     title: "New Task",
   };
-  const response = await server.post("/tasks").send(newTask);
+
+  const response = await server.post("/airtribe/v1/tasks").send(newTask);
+
   t.equal(response.status, 400);
-  t.end();
 });
 
-tap.test("GET /tasks", async (t) => {
-  const response = await server.get("/tasks");
+t.test("GET /tasks", async (t) => {
+  const response = await server.get("/airtribe/v1/tasks");
+
   t.equal(response.status, 200);
-  t.hasOwnProp(response.body[0], "id");
-  t.hasOwnProp(response.body[0], "title");
-  t.hasOwnProp(response.body[0], "description");
-  t.hasOwnProp(response.body[0], "completed");
-  t.type(response.body[0].id, "number");
-  t.type(response.body[0].title, "string");
-  t.type(response.body[0].description, "string");
-  t.type(response.body[0].completed, "boolean");
-  t.end();
+
+  t.ok(Object.hasOwn(response.body[0], "id"));
+  t.ok(Object.hasOwn(response.body[0], "title"));
+  t.ok(Object.hasOwn(response.body[0], "description"));
+  t.ok(Object.hasOwn(response.body[0], "completed"));
+
+  t.equal(typeof response.body[0].id, "number");
+  t.equal(typeof response.body[0].title, "string");
+  t.equal(typeof response.body[0].description, "string");
+  t.equal(typeof response.body[0].completed, "boolean");
 });
 
-tap.test("GET /tasks/:id", async (t) => {
-  const response = await server.get("/tasks/1");
+t.test("GET /tasks/:id", async (t) => {
+  const response = await server.get("/airtribe/v1/tasks/1");
+
   t.equal(response.status, 200);
+
   const expectedTask = {
     id: 1,
     title: "Set up environment",
     description: "Install Node.js, npm, and git",
     completed: true,
+    priority: "low",
   };
+
   t.match(response.body, expectedTask);
-  t.end();
 });
 
-tap.test("GET /tasks/:id with invalid id", async (t) => {
-  const response = await server.get("/tasks/999");
+t.test("GET /tasks/:id with invalid id", async (t) => {
+  const response = await server.get("/airtribe/v1/tasks/999");
+
   t.equal(response.status, 404);
-  t.end();
 });
 
-tap.test("PUT /tasks/:id", async (t) => {
+t.test("PUT /tasks/:id", async (t) => {
   const updatedTask = {
     title: "Updated Task",
     description: "Updated Task Description",
     completed: true,
+    priority: "low",
   };
-  const response = await server.put("/tasks/1").send(updatedTask);
+
+  const response = await server
+    .put("/airtribe/v1/tasks/1")
+    .send(updatedTask);
+
   t.equal(response.status, 200);
-  t.end();
 });
 
-tap.test("PUT /tasks/:id with invalid id", async (t) => {
+t.test("PUT /tasks/:id with invalid id", async (t) => {
   const updatedTask = {
     title: "Updated Task",
     description: "Updated Task Description",
     completed: true,
+    priority: "low",
   };
-  const response = await server.put("/tasks/999").send(updatedTask);
+
+  const response = await server
+    .put("/airtribe/v1/tasks/999")
+    .send(updatedTask);
+
   t.equal(response.status, 404);
-  t.end();
 });
 
-tap.test("PUT /tasks/:id with invalid data", async (t) => {
+t.test("PUT /tasks/:id with invalid data", async (t) => {
   const updatedTask = {
     title: "Updated Task",
     description: "Updated Task Description",
     completed: "true",
+    priority: "medium",
   };
-  const response = await server.put("/tasks/1").send(updatedTask);
+
+  const response = await server
+    .put("/airtribe/v1/tasks/1")
+    .send(updatedTask);
+
   t.equal(response.status, 400);
-  t.end();
 });
 
-tap.test("DELETE /tasks/:id", async (t) => {
-  const response = await server.delete("/tasks/1");
+t.test("DELETE /tasks/:id", async (t) => {
+  const response = await server.delete("/airtribe/v1/tasks/1");
+
   t.equal(response.status, 200);
-  t.end();
 });
 
-tap.test("DELETE /tasks/:id with invalid id", async (t) => {
-  const response = await server.delete("/tasks/999");
+t.test("DELETE /tasks/:id with invalid id", async (t) => {
+  const response = await server.delete("/airtribe/v1/tasks/999");
+
   t.equal(response.status, 404);
-  t.end();
-});
-
-tap.teardown(() => {
-  process.exit(0);
 });
